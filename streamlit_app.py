@@ -13,8 +13,9 @@ if st.button("Skanuj"):
     if target:
         with st.spinner("Skanowanie w toku..."):
             result = scan(target)
-        st.success("Skanowanie zakończone!")
+        
         report = generate_report(result)
         st.markdown(report)
+        st.success("Skanowanie zakończone!")
     else:
         st.warning("Podaj domenę lub IP, by rozpocząć.")
