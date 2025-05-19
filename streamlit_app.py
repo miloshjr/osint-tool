@@ -3,12 +3,12 @@ import subprocess
 
 st.set_page_config(page_title="OSINT Tool", page_icon="🔍")
 
-st.title("🔍 OSINT Tool")
-st.markdown("Podaj domenę lub adres IP, a narzędzie sprawdzi publiczne podatności.")
+st.title("🕵️ OSINT Tool 🔍")
+st.markdown("Podaj domenę, a narzędzie sprawdzi publiczne podatności.")
 
-target = st.text_input("🎯 Cel (domena lub IP):")
+target = st.text_input("🎯 Cel:")
 
-if st.button("Skanuj"):
+if st.button("Skanuj") or st.spinner:
     if target:
         with st.spinner("Skanowanie w toku..."):
             try:

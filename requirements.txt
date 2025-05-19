@@ -1,6 +1,0 @@
-streamlit
-shodan
-requests
-beautifulsoup4
-dnspython
-colorama
