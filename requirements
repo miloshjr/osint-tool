@@ -3,7 +3,6 @@ requests
 beautifulsoup4
 dnspython
 colorama
-dnspython==2.7.0
-python-whois==0.7.3
-python-nmap==0.6.1
-streamlit==1.24.1
+dnspython
+python-whois
+python-nmap
