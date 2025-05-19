@@ -1,5 +1,18 @@
 import streamlit as st
 import subprocess
+import sys
+import subprocess
+
+print("Python executable:", sys.executable)
+
+try:
+    import dns
+    print("dnspython version:", dns.__version__)
+except Exception as e:
+    print("dnspython import error:", e)
+
+# Pokaz zainstalowane pakiety (wielkie gówno, ale czasem pomaga)
+subprocess.run([sys.executable, "-m", "pip", "freeze"])
 
 st.set_page_config(page_title="OSINT Tool", page_icon="🔍")
 

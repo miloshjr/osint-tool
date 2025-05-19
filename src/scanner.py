@@ -1,80 +1,50 @@
-import dns.resolver
-import whois
-import nmap
 import socket
-import sys
-from reporter import generate_report
-print(">>> PYTHON PATH:", sys.executable)
+import nmap
+import whois
+import dns.resolver
 
-def scan_dns(domain):
-    print(f"[DNS] Skanuję: {domain}")
-    results = {}
-    record_types = ["A", "MX", "NS", "TXT"]
-
-    for rtype in record_types:
-        try:
-            answers = dns.resolver.resolve(domain, rtype)
-            results[rtype] = [r.to_text() for r in answers]
-        except Exception as e:
-            results[rtype] = [f"Brak ({str(e)})"]
-
-    return results
-
-
-def scan_whois(domain):
-    print(f"[WHOIS] Skanuję: {domain}")
+def scan_ports(target):
+    nm = nmap.PortScanner()
     try:
-        w = whois.whois(domain)
-        return {
-            "domain_name": w.domain_name,
-            "registrar": w.registrar,
-            "creation_date": str(w.creation_date),
-            "expiration_date": str(w.expiration_date),
-            "name_servers": w.name_servers
-        }
-    except Exception as e:
-        return {"error": str(e)}
-
-
-def scan_ports(ip):
-    print(f"[NMAP] Skanuję porty IP: {ip}")
-    try:
-        nm = nmap.PortScanner()
-        nm.scan(ip, arguments='-Pn -T4')
-        ports = {}
-        for proto in nm[ip].all_protocols():
-            for port in nm[ip][proto]:
-                state = nm[ip][proto][port]['state']
-                ports[f"{proto.upper()} {port}"] = state
+        nm.scan(target, arguments='-sS -Pn')
+        ports = []
+        for host in nm.all_hosts():
+            for proto in nm[host].all_protocols():
+                lport = nm[host][proto].keys()
+                for port in lport:
+                    state = nm[host][proto][port]['state']
+                    ports.append(f"{port}/{proto} - {state}")
         return ports
     except Exception as e:
-        return {"error": str(e)}
+        return [f"Port scan error: {str(e)}"]
 
-
-def main(domain):
+def get_whois(target):
     try:
-        ip = socket.gethostbyname(domain)
+        w = whois.whois(target)
+        return w.text if hasattr(w, "text") else str(w)
     except Exception as e:
-        ip = domain
-        print(f"[WARN] Nie mogę rozwiązać IP: {e}")
+        return f"WHOIS error: {str(e)}"
 
-    dns_info = scan_dns(domain)
-    whois_info = scan_whois(domain)
-    port_info = scan_ports(ip)
+def get_dns_records(domain):
+    records = {}
+    try:
+        for rtype in ['A', 'AAAA', 'MX', 'NS', 'TXT']:
+            answers = dns.resolver.resolve(domain, rtype, raise_on_no_answer=False)
+            records[rtype] = [r.to_text() for r in answers] if answers else []
+    except Exception as e:
+        records['error'] = f"DNS error: {str(e)}"
+    return records
 
-    return {
-        "dns": dns_info,
-        "whois": whois_info,
-        "ports": port_info
-    }
+def scan(target):
+    result = {}
+    # Resolve IP
+    try:
+        ip = socket.gethostbyname(target)
+        result['IP'] = ip
+    except Exception as e:
+        result['IP'] = f"Could not resolve IP: {str(e)}"
 
-
-if __name__ == "__main__":
-    domain = "onet.pl"  # ← Tu wpisz co chcesz
-    result = main(domain)
-
-    print("\n=== WYNIK ===")
-    for section, content in result.items():
-        print(f"\n--- {section.upper()} ---")
-        for k, v in content.items():
-            print(f"{k}: {v}")
+    result['Ports'] = scan_ports(target)
+    result['WHOIS'] = get_whois(target)
+    result['DNS'] = get_dns_records(target)
+    return result
