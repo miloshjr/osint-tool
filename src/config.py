@@ -4,7 +4,7 @@ import os
 
 
 # Klucz Shodan z ENV (bezpieczniej)
-SHODAN_API_KEY = os.getenv("D5rraHjoRL6beiIm3E9BtkfpJsRar58D",)
+SHODAN_API_KEY = st.secrets["SHODAN_API_KEY"]
 
 # Domyślna liczba wyników do pobrania
 RESULT_LIMIT = 1

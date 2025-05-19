@@ -4,4 +4,3 @@ requests
 beautifulsoup4
 dnspython
 colorama
-shodan==1.30.0  
