@@ -1,0 +1,3 @@
+# Sample Report
+
+Scan results for example.com...
